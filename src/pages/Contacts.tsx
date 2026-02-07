@@ -127,7 +127,6 @@ export default function Contacts() {
   // If a contact is passed, it populates the form for editing
   // If no contact is passed, it opens an empty form for adding a new contact
 
-    // After your state declarations
   useEffect(() => {
     loadContacts();
   }, []);
