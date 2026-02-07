@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useEffect } from 'react';
+import { contactsApi } from '../services/api';
 import {
   Typography,
   Box,
@@ -80,8 +82,8 @@ export default function Contacts() {
   // ===========================================================================
 
   // Main contacts list - stores all contacts in the application
-  const [contacts, setContacts] = useState<Contact[]>(initialContacts);
-
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [loading, setLoading] = useState(true);
   // Search query for filtering contacts in the table
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -124,6 +126,24 @@ export default function Contacts() {
   // Opens the add/edit dialog
   // If a contact is passed, it populates the form for editing
   // If no contact is passed, it opens an empty form for adding a new contact
+
+    // After your state declarations
+  useEffect(() => {
+    loadContacts();
+  }, []);
+
+  const loadContacts = async () => {
+    try {
+      setLoading(true);
+      const data = await contactsApi.getAll();
+      setContacts(data);
+    } catch (error) {
+      console.error('Failed to load contacts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };  
+  
   const handleOpenDialog = (contact?: Contact) => {
     if (contact) {
       // Edit mode: populate form with existing contact data
@@ -152,18 +172,19 @@ export default function Contacts() {
   };
 
   // Saves the contact (either creates new or updates existing)
-  const handleSave = () => {
-    if (editingContact) {
-      // Update existing contact: map through contacts and replace the matching one
-      setContacts(contacts.map((c) =>
-        c.id === editingContact.id ? { ...formData, id: editingContact.id } : c
-      ));
-    } else {
-      // Create new contact: generate new ID and add to contacts array
-      const newId = Math.max(...contacts.map((c) => c.id), 0) + 1;
-      setContacts([...contacts, { ...formData, id: newId }]);
+  const handleSave = async () => {
+    try {
+      if (editingContact) {
+        await contactsApi.update(editingContact.id!, formData);
+      } else {
+        await contactsApi.create(formData);
+      }
+      await loadContacts();
+      handleCloseDialog();
+    } catch (error) {
+      console.error('Failed to save contact:', error);
+      alert('Failed to save contact');
     }
-    handleCloseDialog();
   };
 
   // Opens the delete confirmation dialog for a specific contact
@@ -173,13 +194,18 @@ export default function Contacts() {
   };
 
   // Confirms deletion and removes the contact from the list
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (contactToDelete) {
-      // Filter out the contact to delete
-      setContacts(contacts.filter((c) => c.id !== contactToDelete.id));
+      try {
+        await contactsApi.delete(contactToDelete.id!);
+        await loadContacts();
+        setDeleteDialogOpen(false);
+        setContactToDelete(null);
+      } catch (error) {
+        console.error('Failed to delete contact:', error);
+        alert('Failed to delete contact');
+      }
     }
-    setDeleteDialogOpen(false);
-    setContactToDelete(null);
   };
 
   // ===========================================================================
