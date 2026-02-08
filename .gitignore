@@ -34,3 +34,11 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Test coverage
+htmlcov/
+.coverage
+coverage/
+*.cover
+.pytest_cache/
+.vitest/

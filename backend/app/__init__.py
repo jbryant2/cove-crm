@@ -21,7 +21,7 @@ def create_app():
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
     
     # Configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'postgresql://postgres:password@localhost:5433/cove_crm'
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'postgresql://postgres:mypassword123@localhost:5434/cove_crm'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
     
