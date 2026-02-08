@@ -25,9 +25,6 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
     
-    # Debug output (remove later)
-    print(f"Using database: {app.config['SQLALCHEMY_DATABASE_URI']}")
-    
     # Enable CORS for frontend
     CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
     
